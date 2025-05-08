@@ -1,0 +1,62 @@
+1. Actores del Sistema
+• Usuarios: Cada usuario tiene una única cuenta general asociada y puede realizar operaciones como transferencias, depósitos, extracciones y plazos fijos. La autenticación se realiza mediante JWT, sin validaciones adicionales.
+• Administrador: “Este rol tiene permisos ampliados y puede”:
+  o Iniciar sesión
+  o Crear un nuevo usuario
+  o Editar usuario (incluye guardar cambios)
+  o Dar de baja un usuario (incluye confirmación de eliminación)
+  o Cambiar el rol de un usuario
+  o Consultar la lista de usuarios
+  o Cerrar sesión
+________________________________________
+
+2. Requisitos Funcionales
+• Usuarios:
+  o Registrarse o ser creados por un administrador.
+  o Iniciar sesión mediante autenticación JWT.
+  o Consultar su saldo y movimientos.
+• Administrador:
+  o Gestionar usuarios: alta, baja, edición y asignación de roles.
+  o Visualizar listado de usuarios registrados.
+• Cuentas:
+  o Cada usuario tiene una única cuenta general.
+  o El saldo se actualiza con cada operación financiera.
+• Transacciones:
+  o Los usuarios pueden realizar tres tipos: depósito, extracción y transferencia.
+  o Cada transacción debe indicar monto, cuenta origen, cuenta destino (cuando aplique), tipo y fecha.
+• Plazos Fijos:
+  o Los usuarios pueden invertir desde su cuenta en plazos fijos con una tasa de interés fija.
+  o Se registran la cuenta asociada, monto invertido, fecha de inicio y fecha de vencimiento.
+________________________________________
+
+3. Requisitos No Funcionales
+• Seguridad:
+  o Uso de JWT para autenticación.
+  o Contraseñas encriptadas en base de datos.
+  o Control de acceso basado en roles.
+• Rendimiento:
+  o Consultas optimizadas mediante índices en tablas clave (usuarios, cuentas, transacciones).
+  o Manejo eficiente de transacciones simultáneas.
+________________________________________
+
+4. Modelo de Datos y Relaciones
+• Usuarios y Roles: Relación uno a uno o muchos a uno mediante tabla intermedia si se permite múltiples roles en el futuro.
+• Usuarios y Cuentas: Relación uno a uno (una cuenta general por usuario).
+• Cuentas y Transacciones: Cada transacción afecta al menos una cuenta (origen o destino).
+• Cuentas y Plazos Fijos: Una cuenta puede tener múltiples plazos fijos asociados.
+________________________________________
+
+5. Índices
+• Índices en campos utilizados frecuentemente en consultas, como:
+  o usuario_id (en cuentas y transacciones)
+  o fecha_transaccion
+  o tipo_transaccion
+• Estos índices mejoran el rendimiento en reportes, búsquedas y operaciones frecuentes.
+________________________________________
+
+6. Control de Transacciones y Validaciones
+• Transacciones: Son atómicas. Cada operación (depósito, transferencia, extracción) debe ejecutarse completamente o no ejecutarse.
+• Validaciones:
+  o El monto debe ser mayor a cero.
+  o El saldo de la cuenta debe ser suficiente en extracciones o transferencias.
+  o Las cuentas involucradas deben existir y estar activas.
