@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Alkemi\\Final\\Etapa2\\DigitalArsApi\\DigitalArsApi.csproj": {}
+    "D:\\Alkemi\\Final\\CFILP-NetReact-W2-Back-S1\\DigitalArsApi\\DigitalArsApi.csproj": {}
   },
   "projects": {
-    "D:\\Alkemi\\Final\\Etapa2\\DigitalArsApi\\DigitalArsApi.csproj": {
+    "D:\\Alkemi\\Final\\CFILP-NetReact-W2-Back-S1\\DigitalArsApi\\DigitalArsApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Alkemi\\Final\\Etapa2\\DigitalArsApi\\DigitalArsApi.csproj",
+        "projectUniqueName": "D:\\Alkemi\\Final\\CFILP-NetReact-W2-Back-S1\\DigitalArsApi\\DigitalArsApi.csproj",
         "projectName": "DigitalArsApi",
-        "projectPath": "D:\\Alkemi\\Final\\Etapa2\\DigitalArsApi\\DigitalArsApi.csproj",
+        "projectPath": "D:\\Alkemi\\Final\\CFILP-NetReact-W2-Back-S1\\DigitalArsApi\\DigitalArsApi.csproj",
         "packagesPath": "C:\\Users\\sistemas\\.nuget\\packages\\",
-        "outputPath": "D:\\Alkemi\\Final\\Etapa2\\DigitalArsApi\\obj\\",
+        "outputPath": "D:\\Alkemi\\Final\\CFILP-NetReact-W2-Back-S1\\DigitalArsApi\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\sistemas\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -53,9 +53,9 @@
               "target": "Package",
               "version": "[6.*, )"
             },
-            "Microsoft.EntityFrameworkCore.SqlServer": {
+            "Microsoft.EntityFrameworkCore.Sqlite": {
               "target": "Package",
-              "version": "[6.0.*, )"
+              "version": "[6.*, )"
             },
             "Microsoft.EntityFrameworkCore.Tools": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",

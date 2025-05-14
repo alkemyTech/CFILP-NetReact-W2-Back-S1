@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using DigitalArsApi.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -7,6 +10,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddDbContext<DigitalArsContext>(options =>
+    options.UseSqlite("Data Source=digitalars.db"));
+    
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
