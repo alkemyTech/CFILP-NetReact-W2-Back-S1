@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DigitalArsApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6757ee941d666b48eb0f085606765ff8a0890b0c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+107f00b2cafe474e19ff3b0d93518d0f9834eace")]
 [assembly: System.Reflection.AssemblyProductAttribute("DigitalArsApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DigitalArsApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
