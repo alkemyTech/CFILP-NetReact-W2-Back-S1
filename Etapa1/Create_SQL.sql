@@ -20,7 +20,6 @@ CREATE TABLE Usuarios (
   Password VARCHAR(255) NOT NULL,
   Fecha    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   F_Update DATETIME
-
 );
 
 -- RolesUsuarios 
