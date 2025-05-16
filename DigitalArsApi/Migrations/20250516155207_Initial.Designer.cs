@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DigitalArsApi.Migrations
 {
     [DbContext(typeof(DigitalArsContext))]
-    [Migration("20250514143639_Inicial")]
-    partial class Inicial
+    [Migration("20250516155207_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

@@ -10,7 +10,7 @@ using DigitalArsApi.Models;
 
 namespace DigitalArsApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("EstadoPlazoFijo")]
     [ApiController]
     public class EstadoPlazoFijoController : ControllerBase
     {

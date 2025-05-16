@@ -1,53 +1,84 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using System;
+using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Identity;
+using DigitalArsApi.Models;
+using DigitalArsApi.Data;
+
+namespace DigitalArsApi.Controllers;
 
 [ApiController]
 [Route("Token")]
 public class TokenController : ControllerBase
 {
     private readonly IConfiguration _config;
+    private readonly DigitalArsContext _context;
 
-    public TokenController(IConfiguration config)
+    public TokenController(IConfiguration config, DigitalArsContext context)
     {
         _config = config;
+        _context = context;
     }
 
-    [HttpPost("login")] // Cambio de "token" a "generate" para mejor claridad
-    public IActionResult GenerateToken(string username, string password)
+    [HttpPost("login")]
+    public async Task<IActionResult> GenerateToken([FromQuery] string email, [FromQuery] string password)
     {
-        if (username == "admin" && password == "123456")
+        var usuario = await _context.Usuarios
+            .Include(u => u.Roles)
+            .FirstOrDefaultAsync(u => u.Email == email);
+
+        if (usuario == null)
+            return Unauthorized("Usuario no encontrado");
+
+        var hasher = new PasswordHasher<Usuario>();
+        var resultado = hasher.VerifyHashedPassword(usuario, usuario.Password, password);
+
+        if (resultado == PasswordVerificationResult.Failed)
+            return Unauthorized("Contraseña incorrecta");
+
+        var claims = new List<Claim>
+{
+    new Claim(ClaimTypes.Email, usuario.Email)
+};
+
+        // Agregar roles como claims
+        foreach (var rol in usuario.Roles)
         {
-            // Valida usuario y contraseña (¡solo ejemplo, NO para producción!)
-            var claims = new[]
-            {
-                // Define datos del usuario ("claims")
-                new Claim(ClaimTypes.Name, username),
-                new Claim(ClaimTypes.Role, "Administrador")
-            };
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
-            // Obtiene clave secreta de la configuración
-
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            // Crea credenciales de firma
-
-            var token = new JwtSecurityToken(
-                issuer: _config["Jwt:Issuer"],
-                audience: _config["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.Now.AddMinutes(30),
-                signingCredentials: creds
-            );
-            // Crea el token JWT
-
-            return Ok(new JwtSecurityTokenHandler().WriteToken(token));
-            // Devuelve el token serializado
+            claims.Add(new Claim(ClaimTypes.Role, rol.Nombre));
         }
 
-        return Unauthorized();
+        foreach (var rol in usuario.Roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, rol.Nombre));
+        }
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityToken(
+            issuer: _config["Jwt:Issuer"],
+            audience: _config["Jwt:Audience"],
+            claims: claims,
+            expires: DateTime.Now.AddMinutes(60),
+            signingCredentials: creds
+        );
+
+        var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+        return Ok(new
+        {
+            token = tokenString,
+            user = new
+            {
+                usuario.DNI,
+                usuario.Nombre,
+                usuario.Apellido,
+                usuario.Email,
+                roles = usuario.Roles.Select(r => r.Nombre).ToList()
+            }
+        });
     }
 }

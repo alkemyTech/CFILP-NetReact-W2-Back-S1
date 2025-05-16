@@ -10,7 +10,7 @@ using DigitalArsApi.Models;
 
 namespace DigitalArsApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("Tipo")]
     [ApiController]
     public class TipoController : ControllerBase
     {

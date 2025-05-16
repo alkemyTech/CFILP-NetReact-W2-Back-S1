@@ -10,7 +10,7 @@ using DigitalArsApi.Models;
 
 namespace DigitalArsApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("Cuenta")]
     [ApiController]
     public class CuentaController : ControllerBase
     {
