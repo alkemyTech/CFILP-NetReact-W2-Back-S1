@@ -31,12 +31,11 @@ namespace DigitalArsApi.Controllers
             }
 
             var cuentas = await _context.Cuentas
-                .Include(c => c.Usuario) // Incluye la relación uno-a-uno con Usuario
+                .Include(c => c.Usuario)
                 .ToListAsync();
 
             return Ok(cuentas);
         }
-
 
         // GET: api/Cuenta/5
         [HttpGet("{id}")]

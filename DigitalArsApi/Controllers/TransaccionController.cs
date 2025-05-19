@@ -29,7 +29,17 @@ namespace DigitalArsApi.Controllers
             {
                 return NotFound();
             }
-            return await _context.Transacciones.ToListAsync();
+
+            var transacciones = await _context.Transacciones
+                .Include(t => t.CuentaOrigen)
+                    .ThenInclude(c => c.Usuario)
+                .Include(t => t.CuentaDestino)
+                    .ThenInclude(c => c.Usuario)
+                .Include(t => t.Tipo)
+                .Include(t => t.PlazoFijo)
+                .ToListAsync();
+
+            return transacciones;
         }
 
         // GET: api/Transaccion/5
