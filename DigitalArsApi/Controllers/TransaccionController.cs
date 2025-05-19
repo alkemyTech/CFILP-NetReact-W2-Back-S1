@@ -25,10 +25,10 @@ namespace DigitalArsApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Transaccion>>> GetTransacciones()
         {
-          if (_context.Transacciones == null)
-          {
-              return NotFound();
-          }
+            if (_context.Transacciones == null)
+            {
+                return NotFound();
+            }
             return await _context.Transacciones.ToListAsync();
         }
 
@@ -36,10 +36,10 @@ namespace DigitalArsApi.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Transaccion>> GetTransaccion(int id)
         {
-          if (_context.Transacciones == null)
-          {
-              return NotFound();
-          }
+            if (_context.Transacciones == null)
+            {
+                return NotFound();
+            }
             var transaccion = await _context.Transacciones.FindAsync(id);
 
             if (transaccion == null)
@@ -82,19 +82,49 @@ namespace DigitalArsApi.Controllers
         }
 
         // POST: api/Transaccion
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Transaccion>> PostTransaccion(Transaccion transaccion)
         {
-          if (_context.Transacciones == null)
-          {
-              return Problem("Entity set 'DigitalArsContext.Transacciones'  is null.");
-          }
+            if (_context.Transacciones == null)
+            {
+                return Problem("Entity set 'DigitalArsContext.Transacciones' is null.");
+            }
+
+            // Validar que las cuentas existan
+            var cuentaDestino = await _context.Cuentas.FindAsync(transaccion.CtaDestino);
+            if (cuentaDestino == null)
+                return BadRequest("Cuenta destino no encontrada.");
+
+            Cuenta? cuentaOrigen = null;
+            if (transaccion.CtaOrigen.HasValue)
+            {
+                cuentaOrigen = await _context.Cuentas.FindAsync(transaccion.CtaOrigen.Value);
+                if (cuentaOrigen == null)
+                    return BadRequest("Cuenta origen no encontrada.");
+
+                // Validar que tenga saldo suficiente
+                if (cuentaOrigen.Saldo < transaccion.Monto)
+                    return BadRequest("Saldo insuficiente en la cuenta origen.");
+
+                // Descontar saldo
+                cuentaOrigen.Saldo -= transaccion.Monto;
+                cuentaOrigen.F_Update = DateTime.Now;
+            }
+
+            // Sumar saldo a la cuenta destino
+            cuentaDestino.Saldo += transaccion.Monto;
+            cuentaDestino.F_Update = DateTime.Now;
+
+            // Guardar transacción
+            transaccion.Fecha = DateTime.Now;
             _context.Transacciones.Add(transaccion);
+
+            // Persistir cambios
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetTransaccion", new { id = transaccion.Id }, transaccion);
         }
+
 
         // DELETE: api/Transaccion/5
         [HttpDelete("{id}")]

@@ -28,6 +28,7 @@ public class TokenController : ControllerBase
     {
         var usuario = await _context.Usuarios
             .Include(u => u.Roles)
+            .Include(u => u.Cuentas)
             .FirstOrDefaultAsync(u => u.Email == email);
 
         if (usuario == null)
@@ -40,9 +41,9 @@ public class TokenController : ControllerBase
             return Unauthorized("Contraseña incorrecta");
 
         var claims = new List<Claim>
-{
-    new Claim(ClaimTypes.Email, usuario.Email)
-};
+        {
+            new Claim(ClaimTypes.Email, usuario.Email)
+        };
 
         // Agregar roles como claims
         foreach (var rol in usuario.Roles)
@@ -77,7 +78,14 @@ public class TokenController : ControllerBase
                 usuario.Nombre,
                 usuario.Apellido,
                 usuario.Email,
-                roles = usuario.Roles.Select(r => r.Nombre).ToList()
+                roles = usuario.Roles.Select(r => r.Nombre).ToList(),
+                cuentas = usuario.Cuentas.Select(c => new
+                {
+                    c.Numero,
+                    c.Saldo,
+                    c.Fecha,
+                    c.F_Update
+                }).ToList()
             }
         });
     }

@@ -10,10 +10,10 @@ public class Transaccion
     public DateTime Fecha { get; set; }
     public string? Descripcion { get; set; }
 
-    public Cuenta? CuentaOrigen { get; set; }
-    public Cuenta CuentaDestino { get; set; } = null!;
-    public Tipo Tipo { get; set; } = null!;
+    // Relaciones: MARCAR COMO OPCIONAL
+    public Cuenta? CuentaOrigen { get; set; }  // ya era nullable
+    public Cuenta? CuentaDestino { get; set; } // <-- cambiar a nullable
+    public Tipo? Tipo { get; set; }             // <-- cambiar a nullable
 
-    public PlazoFijo? PlazoFijo { get; set; } // 1:1 con PlazoFijo
+    public PlazoFijo? PlazoFijo { get; set; }
 }
-

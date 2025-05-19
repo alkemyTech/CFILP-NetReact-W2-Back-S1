@@ -9,7 +9,11 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(x =>
+        x.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve
+    );
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -78,8 +82,8 @@ builder.Services.AddCors(options =>
 
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    serverOptions.ListenAnyIP(5093); // HTTP
-    serverOptions.ListenAnyIP(7093, listenOptions => listenOptions.UseHttps()); // HTTPS
+    serverOptions.ListenAnyIP(5229); // HTTP
+    serverOptions.ListenAnyIP(7097, listenOptions => listenOptions.UseHttps()); // HTTPS
 });
 
 var app = builder.Build();

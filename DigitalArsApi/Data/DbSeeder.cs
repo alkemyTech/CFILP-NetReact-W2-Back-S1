@@ -12,7 +12,7 @@ public static class DbSeeder
         if (!await context.Tipos.AnyAsync())
         {
             await context.Tipos.AddRangeAsync(
-                new Tipo { Nombre = "Depósito", Descripcion = "Movimiento de fondos de propia cuenta" },
+                new Tipo { Nombre = "Inversión", Descripcion = "Movimiento de fondos a Plazo Fijo" },
                 new Tipo { Nombre = "Transferencia", Descripcion = "Movimiento de fondos entre cuentas de Usuarios" }
             );
             await context.SaveChangesAsync();
@@ -53,7 +53,7 @@ public static class DbSeeder
                 Fecha = DateTime.Now,
                 F_Update = DateTime.Now
             };
-            usuario2.Password = hasher.HashPassword(usuario2, "ana123");
+            usuario2.Password = hasher.HashPassword(usuario2, "luciano123");
 
             await context.Usuarios.AddRangeAsync(usuario1, usuario2);
             await context.SaveChangesAsync();
@@ -69,6 +69,40 @@ public static class DbSeeder
             );
             await context.SaveChangesAsync();
         }
+
+        // Cuenta
+        var usuarioCesar = await context.Usuarios.FirstOrDefaultAsync(u => u.DNI == 32599611);
+        var usuarioLuciano = await context.Usuarios.FirstOrDefaultAsync(u => u.DNI == 45566115);
+
+        if (usuarioCesar != null && !await context.Cuentas.AnyAsync(c => c.DNI == usuarioCesar.DNI))
+        {
+            var cuentaCesar = new Cuenta
+            {
+                Numero = 12345,
+                DNI = usuarioCesar.DNI,
+                Saldo = 50000.00m,
+                Fecha = DateTime.Now,
+                F_Update = DateTime.Now
+            };
+
+            await context.Cuentas.AddAsync(cuentaCesar);
+        }
+
+        if (usuarioLuciano != null && !await context.Cuentas.AnyAsync(c => c.DNI == usuarioLuciano.DNI))
+        {
+            var cuentaLuciano = new Cuenta
+            {
+                Numero = 67890,
+                DNI = usuarioLuciano.DNI,
+                Saldo = 30000.00m,
+                Fecha = DateTime.Now,
+                F_Update = DateTime.Now
+            };
+
+            await context.Cuentas.AddAsync(cuentaLuciano);
+        }
+
+        await context.SaveChangesAsync();
 
         // RolesUsuarios
         // Usuario 1: Cesar con "Usuario" (Id = 2)

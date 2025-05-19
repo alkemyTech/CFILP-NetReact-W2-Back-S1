@@ -25,21 +25,27 @@ namespace DigitalArsApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Cuenta>>> GetCuentas()
         {
-          if (_context.Cuentas == null)
-          {
-              return NotFound();
-          }
-            return await _context.Cuentas.ToListAsync();
+            if (_context.Cuentas == null)
+            {
+                return NotFound();
+            }
+
+            var cuentas = await _context.Cuentas
+                .Include(c => c.Usuario) // Incluye la relación uno-a-uno con Usuario
+                .ToListAsync();
+
+            return Ok(cuentas);
         }
+
 
         // GET: api/Cuenta/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Cuenta>> GetCuenta(int id)
         {
-          if (_context.Cuentas == null)
-          {
-              return NotFound();
-          }
+            if (_context.Cuentas == null)
+            {
+                return NotFound();
+            }
             var cuenta = await _context.Cuentas.FindAsync(id);
 
             if (cuenta == null)
@@ -86,10 +92,10 @@ namespace DigitalArsApi.Controllers
         [HttpPost]
         public async Task<ActionResult<Cuenta>> PostCuenta(Cuenta cuenta)
         {
-          if (_context.Cuentas == null)
-          {
-              return Problem("Entity set 'DigitalArsContext.Cuentas'  is null.");
-          }
+            if (_context.Cuentas == null)
+            {
+                return Problem("Entity set 'DigitalArsContext.Cuentas'  is null.");
+            }
             _context.Cuentas.Add(cuenta);
             await _context.SaveChangesAsync();
 
