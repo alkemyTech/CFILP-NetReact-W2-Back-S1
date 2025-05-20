@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DigitalArsApi.Data;
 using DigitalArsApi.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DigitalArsApi.Controllers
 {
@@ -58,6 +59,7 @@ namespace DigitalArsApi.Controllers
         // PUT: api/Cuenta/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> PutCuenta(int id, Cuenta cuenta)
         {
             if (id != cuenta.Numero)
@@ -89,6 +91,7 @@ namespace DigitalArsApi.Controllers
         // POST: api/Cuenta
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Roles = "Administrador")]
         public async Task<ActionResult<Cuenta>> PostCuenta(Cuenta cuenta)
         {
             if (_context.Cuentas == null)
@@ -103,6 +106,7 @@ namespace DigitalArsApi.Controllers
 
         // DELETE: api/Cuenta/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> DeleteCuenta(int id)
         {
             if (_context.Cuentas == null)

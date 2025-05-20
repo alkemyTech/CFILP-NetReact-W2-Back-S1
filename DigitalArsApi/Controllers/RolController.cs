@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DigitalArsApi.Data;
 using DigitalArsApi.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DigitalArsApi.Controllers
 {
@@ -53,6 +54,7 @@ namespace DigitalArsApi.Controllers
         // PUT: api/Rol/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> PutRol(int id, Rol rol)
         {
             if (id != rol.Id)
@@ -84,12 +86,13 @@ namespace DigitalArsApi.Controllers
         // POST: api/Rol
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Roles = "Administrador")]
         public async Task<ActionResult<Rol>> PostRol(Rol rol)
         {
-          if (_context.Roles == null)
-          {
-              return Problem("Entity set 'DigitalArsContext.Roles'  is null.");
-          }
+            if (_context.Roles == null)
+            {
+                return Problem("Entity set 'DigitalArsContext.Roles'  is null.");
+            }
             _context.Roles.Add(rol);
             await _context.SaveChangesAsync();
 
@@ -98,6 +101,7 @@ namespace DigitalArsApi.Controllers
 
         // DELETE: api/Rol/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> DeleteRol(int id)
         {
             if (_context.Roles == null)

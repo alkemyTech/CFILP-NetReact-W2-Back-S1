@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DigitalArsApi.Data;
 using DigitalArsApi.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DigitalArsApi.Controllers
 {
@@ -53,6 +54,7 @@ namespace DigitalArsApi.Controllers
         // PUT: api/EstadoPlazoFijo/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> PutEstadoPlazoFijo(int id, EstadoPlazoFijo estadoPlazoFijo)
         {
             if (id != estadoPlazoFijo.Id)
@@ -84,12 +86,13 @@ namespace DigitalArsApi.Controllers
         // POST: api/EstadoPlazoFijo
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Roles = "Administrador")]
         public async Task<ActionResult<EstadoPlazoFijo>> PostEstadoPlazoFijo(EstadoPlazoFijo estadoPlazoFijo)
         {
-          if (_context.EstadosPlazoFijo == null)
-          {
-              return Problem("Entity set 'DigitalArsContext.EstadosPlazoFijo'  is null.");
-          }
+            if (_context.EstadosPlazoFijo == null)
+            {
+                return Problem("Entity set 'DigitalArsContext.EstadosPlazoFijo'  is null.");
+            }
             _context.EstadosPlazoFijo.Add(estadoPlazoFijo);
             await _context.SaveChangesAsync();
 
@@ -98,6 +101,7 @@ namespace DigitalArsApi.Controllers
 
         // DELETE: api/EstadoPlazoFijo/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> DeleteEstadoPlazoFijo(int id)
         {
             if (_context.EstadosPlazoFijo == null)

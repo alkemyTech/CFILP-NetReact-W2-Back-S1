@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DigitalArsApi.Data;
 using DigitalArsApi.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DigitalArsApi.Controllers
 {
@@ -63,6 +64,7 @@ namespace DigitalArsApi.Controllers
         // PUT: api/Usuario/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> PutUsuario(int id, Usuario usuario)
         {
             if (id != usuario.DNI)
@@ -94,6 +96,7 @@ namespace DigitalArsApi.Controllers
         // POST: api/Usuario
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Roles = "Administrador")]
         public async Task<ActionResult<Usuario>> PostUsuario(Usuario usuario)
         {
             if (_context.Usuarios == null)
@@ -108,6 +111,7 @@ namespace DigitalArsApi.Controllers
 
         // DELETE: api/Usuario/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> DeleteUsuario(int id)
         {
             if (_context.Usuarios == null)

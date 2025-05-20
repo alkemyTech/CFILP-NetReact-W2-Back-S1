@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DigitalArsApi.Data;
 using DigitalArsApi.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DigitalArsApi.Controllers
 {
@@ -53,6 +54,7 @@ namespace DigitalArsApi.Controllers
         // PUT: api/PlazoFijo/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> PutPlazoFijo(int id, PlazoFijo plazoFijo)
         {
             if (id != plazoFijo.Id)
@@ -84,12 +86,13 @@ namespace DigitalArsApi.Controllers
         // POST: api/PlazoFijo
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Roles = "Administrador, Usuario")]
         public async Task<ActionResult<PlazoFijo>> PostPlazoFijo(PlazoFijo plazoFijo)
         {
-          if (_context.PlazosFijos == null)
-          {
-              return Problem("Entity set 'DigitalArsContext.PlazosFijos'  is null.");
-          }
+            if (_context.PlazosFijos == null)
+            {
+                return Problem("Entity set 'DigitalArsContext.PlazosFijos'  is null.");
+            }
             _context.PlazosFijos.Add(plazoFijo);
             await _context.SaveChangesAsync();
 
@@ -98,6 +101,7 @@ namespace DigitalArsApi.Controllers
 
         // DELETE: api/PlazoFijo/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> DeletePlazoFijo(int id)
         {
             if (_context.PlazosFijos == null)

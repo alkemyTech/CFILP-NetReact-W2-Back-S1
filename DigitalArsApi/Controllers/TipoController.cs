@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DigitalArsApi.Data;
 using DigitalArsApi.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DigitalArsApi.Controllers
 {
@@ -36,10 +37,10 @@ namespace DigitalArsApi.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Tipo>> GetTipo(int id)
         {
-          if (_context.Tipos == null)
-          {
-              return NotFound();
-          }
+            if (_context.Tipos == null)
+            {
+                return NotFound();
+            }
             var tipo = await _context.Tipos.FindAsync(id);
 
             if (tipo == null)
@@ -53,6 +54,7 @@ namespace DigitalArsApi.Controllers
         // PUT: api/Tipo/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> PutTipo(int id, Tipo tipo)
         {
             if (id != tipo.Id)
@@ -84,12 +86,13 @@ namespace DigitalArsApi.Controllers
         // POST: api/Tipo
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Roles = "Administrador")]
         public async Task<ActionResult<Tipo>> PostTipo(Tipo tipo)
         {
-          if (_context.Tipos == null)
-          {
-              return Problem("Entity set 'DigitalArsContext.Tipos'  is null.");
-          }
+            if (_context.Tipos == null)
+            {
+                return Problem("Entity set 'DigitalArsContext.Tipos'  is null.");
+            }
             _context.Tipos.Add(tipo);
             await _context.SaveChangesAsync();
 
@@ -98,6 +101,7 @@ namespace DigitalArsApi.Controllers
 
         // DELETE: api/Tipo/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> DeleteTipo(int id)
         {
             if (_context.Tipos == null)
