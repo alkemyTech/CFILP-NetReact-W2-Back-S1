@@ -32,7 +32,7 @@ namespace DigitalArsApi.Controllers
 
             var usuariosConRoles = await _context.Usuarios
                 .Include(u => u.Roles) // ⬅️ clave para que cargue la relación
-                // .Include(u => u.Cuentas)
+                .Include(u => u.Cuentas)
                 .ToListAsync();
 
             return Ok(usuariosConRoles);
