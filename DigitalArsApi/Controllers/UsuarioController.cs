@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using DigitalArsApi.Data;
 using DigitalArsApi.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace DigitalArsApi.Controllers
 {
@@ -16,10 +17,12 @@ namespace DigitalArsApi.Controllers
     public class UsuarioController : ControllerBase
     {
         private readonly DigitalArsContext _context;
-
+        // private readonly IPasswordHasher<Usuario> _passwordHasher;
+// , IPasswordHasher<Usuario> passwordHasher
         public UsuarioController(DigitalArsContext context)
         {
             _context = context;
+            // _passwordHasher = passwordHasher;
         }
 
         // GET: api/Usuario
@@ -97,16 +100,50 @@ namespace DigitalArsApi.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [Authorize(Roles = "Administrador")]
-        public async Task<ActionResult<Usuario>> PostUsuario(Usuario usuario)
+        public async Task<ActionResult<Usuario>> PostUsuario([FromBody] Usuario usuarioData)
         {
             if (_context.Usuarios == null)
             {
-                return Problem("Entity set 'DigitalArsContext.Usuarios'  is null.");
+                return Problem("Entity set 'DigitalArsContext.Usuarios' is null.");
             }
-            _context.Usuarios.Add(usuario);
+
+            var hasher = new PasswordHasher<Usuario>();
+            string hashedPassword = hasher.HashPassword(usuarioData, usuarioData.Password);
+
+            var newUser = new Usuario
+            {
+                DNI = usuarioData.DNI,
+                Nombre = usuarioData.Nombre,
+                Apellido = usuarioData.Apellido,
+                Email = usuarioData.Email,
+                Password = hashedPassword,
+                Fecha = DateTime.Now,
+                F_Update = DateTime.Now
+            };
+
+            if (usuarioData.Roles != null && usuarioData.Roles.Any())
+            {
+                foreach (var rolRecibido in usuarioData.Roles)
+                {
+                    var rolExistente = await _context.Roles.FindAsync(rolRecibido.Id);
+
+                    if (rolExistente != null)
+                    {
+                        newUser.Roles.Add(rolExistente);
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("Roles", $"Rol with Id {rolRecibido.Id} does not exist.");
+                        return BadRequest(ModelState);
+                    }
+                }
+            }
+
+            _context.Usuarios.Add(newUser);
+
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetUsuario", new { id = usuario.DNI }, usuario);
+            return CreatedAtAction("GetUsuario", new { id = newUser.DNI }, newUser);
         }
 
         // DELETE: api/Usuario/5
