@@ -18,7 +18,7 @@ namespace DigitalArsApi.Controllers
     {
         private readonly DigitalArsContext _context;
         // private readonly IPasswordHasher<Usuario> _passwordHasher;
-// , IPasswordHasher<Usuario> passwordHasher
+        // , IPasswordHasher<Usuario> passwordHasher
         public UsuarioController(DigitalArsContext context)
         {
             _context = context;
@@ -68,14 +68,54 @@ namespace DigitalArsApi.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         [Authorize(Roles = "Administrador")]
-        public async Task<IActionResult> PutUsuario(int id, Usuario usuario)
+        public async Task<IActionResult> PutUsuario(int id, [FromBody] Usuario usuarioData)
         {
-            if (id != usuario.DNI)
+            if (id != usuarioData.DNI)
             {
-                return BadRequest();
+                return BadRequest("El DNI proporcionado en la URL no coincide con el DNI en el cuerpo de la solicitud.");
             }
 
-            _context.Entry(usuario).State = EntityState.Modified;
+            var existingUser = await _context.Usuarios
+                .Include(u => u.Roles)
+                .FirstOrDefaultAsync(u => u.DNI == id);
+
+            if (existingUser == null)
+            {
+                return NotFound($"Usuario con DNI {id} no encontrado.");
+            }
+
+            existingUser.Nombre = usuarioData.Nombre;
+            existingUser.Apellido = usuarioData.Apellido;
+            existingUser.Email = usuarioData.Email;
+            existingUser.F_Update = DateTime.Now;
+
+            if (!string.IsNullOrEmpty(usuarioData.Password))
+            {
+                var hasher = new PasswordHasher<Usuario>();
+                existingUser.Password = hasher.HashPassword(null!, usuarioData.Password);
+            }
+
+            existingUser.Roles.Clear();
+
+            if (usuarioData.Roles != null && usuarioData.Roles.Any())
+            {
+                foreach (var rolRecibido in usuarioData.Roles)
+                {
+                    var rolExistente = await _context.Roles.FindAsync(rolRecibido.Id);
+
+                    if (rolExistente != null)
+                    {
+                        existingUser.Roles.Add(rolExistente);
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("Roles", $"Rol con Id {rolRecibido.Id} no existe.");
+                        return BadRequest(ModelState);
+                    }
+                }
+            }
+
+            _context.Entry(existingUser).State = EntityState.Modified;
 
             try
             {
@@ -85,7 +125,7 @@ namespace DigitalArsApi.Controllers
             {
                 if (!UsuarioExists(id))
                 {
-                    return NotFound();
+                    return NotFound($"Usuario con DNI {id} no encontrado durante la actualización.");
                 }
                 else
                 {
