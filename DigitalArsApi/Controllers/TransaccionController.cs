@@ -96,58 +96,140 @@ namespace DigitalArsApi.Controllers
         // POST: api/Transaccion
         [HttpPost]
         [Authorize(Roles = "Administrador, Usuario")]
-        public async Task<ActionResult<Transaccion>> PostTransaccion(Transaccion transaccion)
+
+        public async Task<ActionResult<Transaccion>> PostTransaccion([FromBody] Transaccion transaccion)
         {
-            if (_context.Transacciones == null)
+            if (_context.Transacciones == null || _context.Cuentas == null || _context.PlazosFijos == null || _context.EstadosPlazoFijo == null)
             {
-                return Problem("Entity set 'DigitalArsContext.Transacciones' is null.");
+                return Problem("Uno o más conjuntos de entidades (Transacciones, Cuentas, PlazosFijos, EstadosPlazoFijo) son nulos en el contexto.");
             }
 
-            using var transaction = await _context.Database.BeginTransactionAsync();
+            using var dbTransaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
-                // Validar que las cuentas existan
-                var cuentaDestino = await _context.Cuentas.FindAsync(transaccion.CtaDestino);
-                if (cuentaDestino == null)
-                    return BadRequest("Cuenta destino no encontrada.");
-
-                Cuenta? cuentaOrigen = null;
-                if (transaccion.CtaOrigen.HasValue)
-                {
-                    cuentaOrigen = await _context.Cuentas.FindAsync(transaccion.CtaOrigen.Value);
-                    if (cuentaOrigen == null)
-                        return BadRequest("Cuenta origen no encontrada.");
-
-                    // Validar que tenga saldo suficiente
-                    if (cuentaOrigen.Saldo < transaccion.Monto)
-                        return BadRequest("Saldo insuficiente en la cuenta origen.");
-
-                    // Descontar saldo
-                    cuentaOrigen.Saldo -= transaccion.Monto;
-                    cuentaOrigen.F_Update = DateTime.Now;
-                    _context.Cuentas.Update(cuentaOrigen);
-                }
-
-                // Sumar saldo a la cuenta destino
-                cuentaDestino.Saldo += transaccion.Monto;
-                cuentaDestino.F_Update = DateTime.Now;
-                _context.Cuentas.Update(cuentaDestino);
-
-                // Guardar transacción
                 transaccion.Fecha = DateTime.Now;
                 _context.Transacciones.Add(transaccion);
 
-                // Persistir cambios
+                if (transaccion.IdTipo == 2) // Tipo: Transferencia
+                {
+                    if (!transaccion.CtaOrigen.HasValue)
+                    {
+                        return BadRequest("Para transferencias, la cuenta origen es obligatoria.");
+                    }
+
+                    var cuentaOrigen = await _context.Cuentas.FindAsync(transaccion.CtaOrigen.Value);
+                    var cuentaDestino = await _context.Cuentas.FindAsync(transaccion.CtaDestino);
+
+                    if (cuentaOrigen == null)
+                    {
+                        return BadRequest("Cuenta origen no encontrada.");
+                    }
+                    if (cuentaDestino == null)
+                    {
+                        return BadRequest("Cuenta destino no encontrada.");
+                    }
+                    if (cuentaOrigen.Numero == cuentaDestino.Numero)
+                    {
+                        return BadRequest("No se puede transferir a la misma cuenta.");
+                    }
+
+                    if (cuentaOrigen.Saldo < transaccion.Monto)
+                    {
+                        return BadRequest("Saldo insuficiente en la cuenta origen para la transferencia.");
+                    }
+
+                    cuentaOrigen.Saldo -= transaccion.Monto;
+                    cuentaOrigen.F_Update = DateTime.Now;
+                    _context.Cuentas.Update(cuentaOrigen);
+
+                    cuentaDestino.Saldo += transaccion.Monto;
+                    cuentaDestino.F_Update = DateTime.Now;
+                    _context.Cuentas.Update(cuentaDestino);
+
+                    if (string.IsNullOrWhiteSpace(transaccion.Descripcion))
+                    {
+                        transaccion.Descripcion = "Transferencia de fondos";
+                    }
+                }
+                else if (transaccion.IdTipo == 1) // Tipo: Inversión a Plazo Fijo
+                {
+                    if (!transaccion.CtaOrigen.HasValue || transaccion.CtaOrigen.Value != transaccion.CtaDestino)
+                    {
+                        return BadRequest("Para inversiones, la cuenta origen y destino deben ser la misma.");
+                    }
+
+                    var cuentaInversion = await _context.Cuentas.FindAsync(transaccion.CtaOrigen.Value);
+
+                    if (cuentaInversion == null)
+                    {
+                        return BadRequest("Cuenta de inversión no encontrada.");
+                    }
+
+                    if (cuentaInversion.Saldo < transaccion.Monto)
+                    {
+                        return BadRequest("Saldo insuficiente en la cuenta para realizar la inversión.");
+                    }
+
+                    int diasPlazoFijo = 0;
+                    if (!string.IsNullOrEmpty(transaccion.Descripcion) && transaccion.Descripcion.Contains("días"))
+                    {
+                        var match = System.Text.RegularExpressions.Regex.Match(transaccion.Descripcion, @"por (\d+)\s*días");
+                        if (match.Success && int.TryParse(match.Groups[1].Value, out int parsedDays))
+                        {
+                            diasPlazoFijo = parsedDays;
+                        }
+                    }
+
+                    if (diasPlazoFijo <= 0)
+                    {
+                        return BadRequest("No se pudo determinar el plazo en días para la inversión. Asegúrese de que la descripción contenga 'por X días'.");
+                    }
+
+                    cuentaInversion.Saldo -= transaccion.Monto;
+                    cuentaInversion.F_Update = DateTime.Now;
+                    _context.Cuentas.Update(cuentaInversion);
+
+                    await _context.SaveChangesAsync();
+
+                    const decimal TASA_ANUAL_DEFAULT = 0.32m;
+                    DateTime fechaVencimiento = DateTime.Now.AddDays(diasPlazoFijo);
+
+                    decimal tasaDiaria = TASA_ANUAL_DEFAULT / 365m;
+                    decimal interesEsperado = transaccion.Monto * tasaDiaria * diasPlazoFijo;
+
+                    var estadoActivo = await _context.EstadosPlazoFijo.FirstOrDefaultAsync(e => e.Nombre == "Activo");
+                    if (estadoActivo == null)
+                    {
+                        return StatusCode(500, "Estado 'Activo' para Plazo Fijo no encontrado en la base de datos. Asegúrese de que exista.");
+                    }
+
+                    var plazoFijo = new PlazoFijo
+                    {
+                        IdTransaccion = transaccion.Id, // Usamos el ID generado
+                        Monto = transaccion.Monto,
+                        TNA = TASA_ANUAL_DEFAULT,
+                        F_Inicio = DateTime.Now,
+                        F_Fin = fechaVencimiento,
+                        InteresEsperado = interesEsperado,
+                        IdEstado = estadoActivo.Id
+                    };
+                    _context.PlazosFijos.Add(plazoFijo);
+                }
+                else
+                {
+                    return BadRequest("Tipo de transacción no válido.");
+                }
+
                 await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
+                await dbTransaction.CommitAsync();
 
                 return CreatedAtAction("GetTransaccion", new { id = transaccion.Id }, transaccion);
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync();
-                // Logging opcional
+                await dbTransaction.RollbackAsync();
+                Console.Error.WriteLine($"Error al procesar la transacción: {ex.Message} - StackTrace: {ex.StackTrace}");
                 return StatusCode(500, $"Error al procesar la transacción: {ex.Message}");
             }
         }
