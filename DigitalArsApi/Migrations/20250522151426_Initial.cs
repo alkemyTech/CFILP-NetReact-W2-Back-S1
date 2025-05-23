@@ -56,9 +56,9 @@ namespace DigitalArsApi.Migrations
                     DNI = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Nombre = table.Column<string>(type: "TEXT", nullable: false),
-                    Apellido = table.Column<string>(type: "TEXT", nullable: false),
+                    Apellido = table.Column<string>(type: "TEXT", nullable: true),
                     Email = table.Column<string>(type: "TEXT", nullable: false),
-                    Password = table.Column<string>(type: "TEXT", nullable: false),
+                    Password = table.Column<string>(type: "TEXT", nullable: true),
                     Fecha = table.Column<DateTime>(type: "TEXT", nullable: false),
                     F_Update = table.Column<DateTime>(type: "TEXT", nullable: true)
                 },
@@ -73,7 +73,7 @@ namespace DigitalArsApi.Migrations
                 {
                     Numero = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    DNI = table.Column<int>(type: "INTEGER", nullable: false),
+                    DNI = table.Column<int>(type: "INTEGER", nullable: true),
                     Saldo = table.Column<decimal>(type: "TEXT", nullable: false),
                     Fecha = table.Column<DateTime>(type: "TEXT", nullable: false),
                     F_Update = table.Column<DateTime>(type: "TEXT", nullable: true)

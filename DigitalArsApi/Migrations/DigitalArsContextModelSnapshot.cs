@@ -23,7 +23,7 @@ namespace DigitalArsApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("DNI")
+                    b.Property<int?>("DNI")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime?>("F_Update")
@@ -169,7 +169,6 @@ namespace DigitalArsApi.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Apellido")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Email")
@@ -187,7 +186,6 @@ namespace DigitalArsApi.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Password")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("DNI");
@@ -220,8 +218,7 @@ namespace DigitalArsApi.Migrations
                     b.HasOne("DigitalArsApi.Models.Usuario", "Usuario")
                         .WithMany("Cuentas")
                         .HasForeignKey("DNI")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Usuario");
                 });

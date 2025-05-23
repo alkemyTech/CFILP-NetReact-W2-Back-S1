@@ -3,7 +3,7 @@ namespace DigitalArsApi.Models;
 public class Cuenta
 {
     public int Numero { get; set; }
-    public int DNI { get; set; }
+    public int? DNI { get; set; }
     public decimal Saldo { get; set; }
     public DateTime Fecha { get; set; }
     public DateTime? F_Update { get; set; }

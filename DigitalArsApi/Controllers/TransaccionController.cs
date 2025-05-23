@@ -111,7 +111,7 @@ namespace DigitalArsApi.Controllers
                 transaccion.Fecha = DateTime.Now;
                 _context.Transacciones.Add(transaccion);
 
-                if (transaccion.IdTipo == 2) // Tipo: Transferencia
+                if (transaccion.IdTipo == 3) // Tipo: Transferencia
                 {
                     if (!transaccion.CtaOrigen.HasValue)
                     {
@@ -152,7 +152,7 @@ namespace DigitalArsApi.Controllers
                         transaccion.Descripcion = "Transferencia de fondos";
                     }
                 }
-                else if (transaccion.IdTipo == 1) // Tipo: Inversión a Plazo Fijo
+                else if (transaccion.IdTipo == 2) // Tipo: Inversión a Plazo Fijo
                 {
                     if (!transaccion.CtaOrigen.HasValue || transaccion.CtaOrigen.Value != transaccion.CtaDestino)
                     {

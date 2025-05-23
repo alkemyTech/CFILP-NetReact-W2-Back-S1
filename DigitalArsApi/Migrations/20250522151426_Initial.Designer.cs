@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DigitalArsApi.Migrations
 {
     [DbContext(typeof(DigitalArsContext))]
-    [Migration("20250519003056_Initial")]
+    [Migration("20250522151426_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace DigitalArsApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("DNI")
+                    b.Property<int?>("DNI")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime?>("F_Update")
@@ -171,7 +171,6 @@ namespace DigitalArsApi.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Apellido")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Email")
@@ -189,7 +188,6 @@ namespace DigitalArsApi.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Password")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("DNI");
@@ -222,8 +220,7 @@ namespace DigitalArsApi.Migrations
                     b.HasOne("DigitalArsApi.Models.Usuario", "Usuario")
                         .WithMany("Cuentas")
                         .HasForeignKey("DNI")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Usuario");
                 });

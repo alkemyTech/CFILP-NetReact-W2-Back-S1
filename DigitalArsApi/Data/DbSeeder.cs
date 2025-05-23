@@ -8,11 +8,23 @@ public static class DbSeeder
 {
     public static async Task SeedAsync(DigitalArsContext context)
     {
+        // EstadosPlazoFijo
+        if (!await context.EstadosPlazoFijo.AnyAsync())
+        {
+            await context.EstadosPlazoFijo.AddRangeAsync(
+                new EstadoPlazoFijo { Nombre = "Activo" },
+                new EstadoPlazoFijo { Nombre = "Cancelado" },
+                new EstadoPlazoFijo { Nombre = "Vencido" }
+            );
+            await context.SaveChangesAsync();
+        }
+
         // Tipos
         if (!await context.Tipos.AnyAsync())
         {
             await context.Tipos.AddRangeAsync(
-                new Tipo { Nombre = "Inversión", Descripcion = "Movimiento de fondos a Plazo Fijo" },
+                new Tipo { Nombre = "Depósito", Descripcion = "Movimiento de fondos a cuenta propia" },
+                new Tipo { Nombre = "Plazo Fijo", Descripcion = "Movimiento de fondos a Plazo Fijo" },
                 new Tipo { Nombre = "Transferencia", Descripcion = "Movimiento de fondos entre cuentas de Usuarios" }
             );
             await context.SaveChangesAsync();
@@ -32,6 +44,36 @@ public static class DbSeeder
         if (!await context.Usuarios.AnyAsync())
         {
             var hasher = new PasswordHasher<Usuario>();
+
+            var user1 = new Usuario
+            {
+                DNI = 20,
+                Nombre = "Western Union",
+                Email = "western@union.com",
+                Fecha = DateTime.Now,
+                F_Update = DateTime.Now
+            };
+            user1.Password = hasher.HashPassword(user1, "user1");
+
+            var user2 = new Usuario
+            {
+                DNI = 40,
+                Nombre = "Mercado Pago",
+                Email = "mercado@pago.com",
+                Fecha = DateTime.Now,
+                F_Update = DateTime.Now
+            };
+            user2.Password = hasher.HashPassword(user2, "user2");
+
+            var user3 = new Usuario
+            {
+                DNI = 60,
+                Nombre = "Personal Pay",
+                Email = "personal@pay.com",
+                Fecha = DateTime.Now,
+                F_Update = DateTime.Now
+            };
+            user3.Password = hasher.HashPassword(user3, "user3");
 
             var usuario1 = new Usuario
             {
@@ -55,22 +97,44 @@ public static class DbSeeder
             };
             usuario2.Password = hasher.HashPassword(usuario2, "luciano123");
 
-            await context.Usuarios.AddRangeAsync(usuario1, usuario2);
+            await context.Usuarios.AddRangeAsync(user1, user2, user3, usuario1, usuario2);
             await context.SaveChangesAsync();
         }
 
-        // EstadosPlazoFijo
-        if (!await context.EstadosPlazoFijo.AnyAsync())
+        // Cuentas
+        if (!await context.Cuentas.AnyAsync())
         {
-            await context.EstadosPlazoFijo.AddRangeAsync(
-                new EstadoPlazoFijo { Nombre = "Activo" },
-                new EstadoPlazoFijo { Nombre = "Cancelado" },
-                new EstadoPlazoFijo { Nombre = "Vencido" }
-            );
-            await context.SaveChangesAsync();
+            var cuentaExtra1 = new Cuenta
+            {
+                Numero = 20,
+                DNI = 20,
+                Saldo = 0,
+                Fecha = DateTime.Now,
+                F_Update = DateTime.Now
+            };
+
+            var cuentaExtra2 = new Cuenta
+            {
+                Numero = 40,
+                DNI = 40,
+                Saldo = 0,
+                Fecha = DateTime.Now,
+                F_Update = DateTime.Now
+            };
+
+            var cuentaExtra3 = new Cuenta
+            {
+                Numero = 60,
+                DNI = 60,
+                Saldo = 0,
+                Fecha = DateTime.Now,
+                F_Update = DateTime.Now
+            };
+
+            await context.Cuentas.AddRangeAsync(cuentaExtra1, cuentaExtra2, cuentaExtra3);
+            await context.SaveChangesAsync(); // Agregado SaveChangesAsync aquí
         }
 
-        // Cuenta
         var usuarioCesar = await context.Usuarios.FirstOrDefaultAsync(u => u.DNI == 32599611);
         var usuarioLuciano = await context.Usuarios.FirstOrDefaultAsync(u => u.DNI == 45566115);
 
