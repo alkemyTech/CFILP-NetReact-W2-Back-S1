@@ -152,6 +152,33 @@ namespace DigitalArsApi.Controllers
                         transaccion.Descripcion = "Transferencia de fondos";
                     }
                 }
+                else if (transaccion.IdTipo == 1) // Tipo: Depósito
+                {
+                    if (transaccion.CtaDestino <= 0)
+                    {
+                        return BadRequest("Para depósitos, la cuenta destino es obligatoria y debe ser un número de cuenta válido.");
+                    }
+                    if (transaccion.Monto <= 0)
+                    {
+                        return BadRequest("El monto del depósito debe ser mayor a cero.");
+                    }
+
+                    var cuentaDestino = await _context.Cuentas.FindAsync(transaccion.CtaDestino);
+                    
+                    if (cuentaDestino == null)
+                    {
+                        return BadRequest("Cuenta destino para el depósito no encontrada.");
+                    }
+
+                    cuentaDestino.Saldo += transaccion.Monto;
+                    cuentaDestino.F_Update = DateTime.Now;
+                    _context.Cuentas.Update(cuentaDestino);
+
+                    if (string.IsNullOrWhiteSpace(transaccion.Descripcion))
+                    {
+                        transaccion.Descripcion = $"Depósito de fondos desde cuenta {transaccion.CtaOrigen?.ToString() ?? "Desconocida"}";
+                    }
+                }
                 else if (transaccion.IdTipo == 2) // Tipo: Inversión a Plazo Fijo
                 {
                     if (!transaccion.CtaOrigen.HasValue || transaccion.CtaOrigen.Value != transaccion.CtaDestino)
